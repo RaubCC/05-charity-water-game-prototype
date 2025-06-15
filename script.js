@@ -435,74 +435,160 @@ showRotatingFact();
 window.addEventListener('DOMContentLoaded', function() {
     document.getElementById('loading-message').style.display = 'none';
     // Assign DOM elements now that the DOM is loaded
-    pauseBtn = document.getElementById('pause-btn');
-    sidebar = document.getElementById('sidebar');
-    // Also re-assign any other elements that might be undefined
-    deliveredDisplay = document.getElementById('water-delivered');
-    factPopup = document.getElementById('fact-popup');
-    factText = document.getElementById('fact-text');
-    closeFact = document.getElementById('close-fact');
-    levelDisplay = document.getElementById('level-display');
-    // Start the game
-    startGame();
-});
-
-// --- Mobile Controls for Touch Devices ---
-// These buttons let users play on phones/tablets without a keyboard.
-const btnLeft = document.getElementById('btn-left');
-const btnRight = document.getElementById('btn-right');
-const btnRotate = document.getElementById('btn-rotate');
-const btnDrop = document.getElementById('btn-drop');
-
-if (btnLeft && btnRight && btnRotate && btnDrop) {
-    // Move left
-    function moveLeft(e) {
-        e.preventDefault();
-        if (!gameOver && validMove(-1, 0)) {
-            pos.x--;
-            drawBoard();
-            dropStart = Date.now(); // Reset drop timer
-        }
-    }
-    btnLeft.addEventListener('touchstart', moveLeft);
-    btnLeft.addEventListener('click', moveLeft);
-
-    // Move right
-    function moveRight(e) {
-        e.preventDefault();
-        if (!gameOver && validMove(1, 0)) {
-            pos.x++;
-            drawBoard();
-            dropStart = Date.now(); // Reset drop timer
-        }
-    }
-    btnRight.addEventListener('touchstart', moveRight);
-    btnRight.addEventListener('click', moveRight);
-
-    // Rotate
-    function rotatePiece(e) {
-        e.preventDefault();
-        if (!gameOver) {
+    const pauseBtn = document.getElementById('pause-btn');
+    const sidebar = document.getElementById('sidebar');
+    const deliveredDisplay = document.getElementById('water-delivered');
+    const factPopup = document.getElementById('fact-popup');
+    const factText = document.getElementById('fact-text');
+    const closeFact = document.getElementById('close-fact');
+    const levelDisplay = document.getElementById('level-display');
+    const overlayRestart = document.getElementById('overlay-restart');
+    const factRotator = document.getElementById('fact-rotator');
+    const btnLeft = document.getElementById('btn-left');
+    const btnRight = document.getElementById('btn-right');
+    const btnRotate = document.getElementById('btn-rotate');
+    const btnDrop = document.getElementById('btn-drop');
+    // Now, redefine all functions and event listeners that use these elements here
+    function handleKey(e) {
+        if (gameOver && e.key !== "Enter") return;
+        if (e.key === "ArrowLeft" && validMove(-1, 0)) pos.x--;
+        if (e.key === "ArrowRight" && validMove(1, 0)) pos.x++;
+        if (e.key === "ArrowDown" && validMove(0, 1)) pos.y++;
+        if (e.key === "ArrowUp") {
             const rotated = rotate(current.shape);
-            if (validMove(0, 0, rotated)) {
-                current.shape = rotated;
+            if (validMove(0, 0, rotated)) current.shape = rotated;
+        }
+        if (e.key === " ") {
+            while (validMove(0, 1)) pos.y++;
+        }
+        if (e.key === "Enter" && gameOver) {
+            startGame();
+            factPopup.style.display = 'none';
+        }
+        drawBoard();
+    }
+    document.addEventListener('keydown', function(e) {
+        // Prevent arrow keys and space from scrolling the page
+        if (["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown", " ", "Spacebar"].includes(e.key)) {
+            e.preventDefault();
+        }
+        handleKey(e);
+    });
+
+    pauseBtn.onclick = function() {
+        paused = !paused;
+        pauseBtn.textContent = paused ? 'Resume' : 'Pause';
+        if (!paused) drop();
+    };
+    sidebarToggle.onclick = function() {
+        sidebar.classList.toggle('collapsed');
+    };
+    document.getElementById('instructions').onclick = function() {
+        howToModal.style.display = 'flex';
+    };
+    closeHowTo.onclick = function() {
+        howToModal.style.display = 'none';
+    };
+
+    function startGame() {
+        liters = 0;
+        linesCleared = 0;
+        level = 1;
+        linesToNextLevel = 8;
+        mudChance = 0.10;
+        dropSpeeds = [600, 450, 350, 250, 150];
+        board = Array.from({length: ROWS}, () => Array(COLS).fill(0));
+        current = randomTetromino();
+        next = randomTetromino();
+        pos = {x: 3, y: 0};
+        gameOver = false;
+        paused = false;
+        pauseBtn.textContent = 'Pause';
+        sidebar.classList.remove('collapsed');
+        drawNext();
+        deliveredDisplay.textContent = `Liters Delivered: 0`;
+        updateLevelDisplay();
+        updateLinesToNext();
+        dropStart = Date.now();
+        hideGameOverOverlay();
+        drop();
+    }
+    document.getElementById('restart').onclick = startGame;
+
+    // Overlay restart button
+    overlayRestart.onclick = () => {
+        hideGameOverOverlay();
+        startGame();
+    };
+
+    // Also allow Enter key to restart from overlay
+    overlayRestart.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter' || e.key === ' ') {
+            hideGameOverOverlay();
+            startGame();
+        }
+    });
+
+    // Charity: water Fact Rotator
+    let factIndex = 0;
+    setInterval(showRotatingFact, 8000);
+    showRotatingFact();
+
+    // --- Mobile Controls for Touch Devices ---
+    // These buttons let users play on phones/tablets without a keyboard.
+    if (btnLeft && btnRight && btnRotate && btnDrop) {
+        // Move left
+        function moveLeft(e) {
+            e.preventDefault();
+            if (!gameOver && validMove(-1, 0)) {
+                pos.x--;
                 drawBoard();
                 dropStart = Date.now(); // Reset drop timer
             }
         }
-    }
-    btnRotate.addEventListener('touchstart', rotatePiece);
-    btnRotate.addEventListener('click', rotatePiece);
+        btnLeft.addEventListener('touchstart', moveLeft);
+        btnLeft.addEventListener('click', moveLeft);
 
-    // Drop
-    function dropPiece(e) {
-        e.preventDefault();
-        if (!gameOver) {
-            while (validMove(0, 1)) pos.y++;
-            drawBoard();
-            dropStart = Date.now(); // Reset drop timer
+        // Move right
+        function moveRight(e) {
+            e.preventDefault();
+            if (!gameOver && validMove(1, 0)) {
+                pos.x++;
+                drawBoard();
+                dropStart = Date.now(); // Reset drop timer
+            }
         }
+        btnRight.addEventListener('touchstart', moveRight);
+        btnRight.addEventListener('click', moveRight);
+
+        // Rotate
+        function rotatePiece(e) {
+            e.preventDefault();
+            if (!gameOver) {
+                const rotated = rotate(current.shape);
+                if (validMove(0, 0, rotated)) {
+                    current.shape = rotated;
+                    drawBoard();
+                    dropStart = Date.now(); // Reset drop timer
+                }
+            }
+        }
+        btnRotate.addEventListener('touchstart', rotatePiece);
+        btnRotate.addEventListener('click', rotatePiece);
+
+        // Drop
+        function dropPiece(e) {
+            e.preventDefault();
+            if (!gameOver) {
+                while (validMove(0, 1)) pos.y++;
+                drawBoard();
+                dropStart = Date.now(); // Reset drop timer
+            }
+        }
+        btnDrop.addEventListener('touchstart', dropPiece);
+        btnDrop.addEventListener('click', dropPiece);
     }
-    btnDrop.addEventListener('touchstart', dropPiece);
-    btnDrop.addEventListener('click', dropPiece);
-}
+
+    // Start the game
+    startGame();
+});
