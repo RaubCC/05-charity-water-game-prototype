@@ -478,6 +478,14 @@ window.addEventListener('DOMContentLoaded', function() {
     }
 
     // Add this function so the game does not crash
+    function hideGameOverOverlay() {
+        if (gameOverOverlay) {
+            gameOverOverlay.style.display = 'none';
+            gameOverOverlay.classList.remove('active');
+        }
+    }
+
+    // Add this function so the game does not crash
     function updateLevelDisplay() {
         if (levelDisplay) {
             levelDisplay.textContent = `Level: ${level}`;
