@@ -70,6 +70,16 @@ SHAPES.push([[MUD_INDEX]]); // Single block
 COLORS.push('#8B5C2A'); // Brown color for mud
 PIECE_NAMES.push('Mud Block');
 
+// Sound effects
+const sounds = {
+    line: new Audio('https://cdn.jsdelivr.net/gh/terkelg/awesome-creative-coding-assets/audio/pop.ogg'),
+    level: new Audio('https://cdn.jsdelivr.net/gh/terkelg/awesome-creative-coding-assets/audio/coin.ogg'),
+    gameover: new Audio('https://cdn.jsdelivr.net/gh/terkelg/awesome-creative-coding-assets/audio/lose.ogg'),
+    mud: new Audio('https://cdn.jsdelivr.net/gh/terkelg/awesome-creative-coding-assets/audio/hit.ogg')
+};
+
+let paused = false;
+
 // Utility
 function randomTetromino() {
     // 3% Jerry Can, mudChance for Mud Block, rest normal
@@ -170,6 +180,10 @@ function mergeTetromino() {
         liters = Math.max(0, liters - 100);
         deliveredDisplay.textContent = `Liters Delivered: ${liters}`;
         showFact("Oh no! Mud block! -100 liters delivered.");
+        deliveredDisplay.classList.remove('score-up', 'score-down');
+        deliveredDisplay.classList.add('score-down');
+        setTimeout(() => deliveredDisplay.classList.remove('score-down'), 400);
+        sounds.mud.currentTime = 0; sounds.mud.play();
     } else {
         current.shape.forEach((row, y) => {
             row.forEach((value, x) => {
@@ -196,14 +210,18 @@ function clearLines() {
 function animateLiters(oldVal, newVal) {
     let step = Math.max(1, Math.floor((newVal - oldVal) / 16));
     let val = oldVal;
+    const up = newVal > oldVal;
+    deliveredDisplay.classList.remove('score-up', 'score-down');
+    deliveredDisplay.classList.add(up ? 'score-up' : 'score-down');
     function tick() {
-        if (val < newVal) {
-            val += step;
-            if (val > newVal) val = newVal;
+        if ((up && val < newVal) || (!up && val > newVal)) {
+            val += up ? step : -step;
+            if ((up && val > newVal) || (!up && val < newVal)) val = newVal;
             deliveredDisplay.textContent = `Liters Delivered: ${val}`;
             requestAnimationFrame(tick);
         } else {
             deliveredDisplay.textContent = `Liters Delivered: ${newVal}`;
+            setTimeout(() => deliveredDisplay.classList.remove('score-up', 'score-down'), 400);
         }
     }
     tick();
@@ -257,6 +275,8 @@ function updateLiters(lines) {
         animateLiters(litersOld, liters);
         showFact();
         updateLevel();
+        updateLinesToNext();
+        sounds.line.currentTime = 0; sounds.line.play();
     }
 }
 function updateLevel() {
@@ -272,38 +292,47 @@ function updateLevel() {
             showFact(`Level Up! Welcome to Level ${level}.`);
             showConfetti();
             updateLevelDisplay();
+            sounds.level.currentTime = 0; sounds.level.play();
         }
     }
 }
-function updateLevelDisplay() {
-    levelDisplay.textContent = `Level: ${level}`;
+function updateLinesToNext() {
+    const left = Math.max(0, linesToNextLevel - linesCleared);
+    linesToNext.textContent = `Next Level in ${left} line${left === 1 ? '' : 's'}`;
 }
-
-// Charity: water Fact Rotator
-const factRotator = document.getElementById('fact-rotator');
-let factIndex = 0;
 function showRotatingFact() {
     factRotator.textContent = WATER_FACTS[factIndex];
     factIndex = (factIndex + 1) % WATER_FACTS.length;
 }
-setInterval(showRotatingFact, 8000);
-showRotatingFact();
-
-// Remove popup fact logic
-function showFact(text) { /* no-op for now */ }
-closeFact.onclick = () => { /* no-op for now */ }
-
-function showGameOverOverlay() {
-    finalLiters.textContent = `You delivered ${liters} liters of clean water!`;
-    gameOverOverlay.classList.add('active');
-    overlayRestart.focus();
+function drawSidebar() {
+    const sidebar = document.getElementById('sidebar');
+    const ctx = sidebar.getContext('2d');
+    ctx.clearRect(0, 0, sidebar.width, sidebar.height);
+    ctx.fillStyle = '#fff';
+    ctx.fillRect(0, 0, sidebar.width, sidebar.height);
+    ctx.fillStyle = '#222';
+    ctx.font = 'bold 16px Arial';
+    ctx.fillText('Pipe Tetris', 10, 20);
+    ctx.font = '14px Arial';
+    ctx.fillText('Lines Cleared: ' + linesCleared, 10, 50);
+    ctx.fillText('Liters Delivered: ' + liters, 10, 70);
+    ctx.fillText('Level: ' + level, 10, 90);
+    ctx.fillText('Next Level in: ' + (linesToNextLevel - linesCleared), 10, 110);
 }
-function hideGameOverOverlay() {
-    gameOverOverlay.classList.remove('active');
+function toggleSidebar() {
+    const sidebar = document.getElementById('sidebar');
+    sidebar.classList.toggle('collapsed');
 }
-
-function drop() {
-    if (gameOver) return;
+function showHowToModal() {
+    const modal = document.getElementById('how-to-modal');
+    modal.style.display = 'flex';
+}
+function hideHowToModal() {
+    const modal = document.getElementById('how-to-modal');
+    modal.style.display = 'none';
+}
+function draw() {
+    if (gameOver || paused) return;
     let now = Date.now(), delta = now - dropStart;
     let speed = dropSpeeds[level - 1] || 200;
     if (delta > speed) {
@@ -323,7 +352,8 @@ function drop() {
         dropStart = Date.now();
     }
     drawBoard();
-    if (!gameOver) requestAnimationFrame(drop);
+    drawSidebar();
+    if (!gameOver && !paused) requestAnimationFrame(draw);
 }
 function resetTetromino() {
     current = next;
@@ -357,6 +387,21 @@ document.addEventListener('keydown', function(e) {
     handleKey(e);
 });
 
+pauseBtn.onclick = function() {
+    paused = !paused;
+    pauseBtn.textContent = paused ? 'Resume' : 'Pause';
+    if (!paused) drop();
+};
+sidebarToggle.onclick = function() {
+    sidebar.classList.toggle('collapsed');
+};
+document.getElementById('instructions').onclick = function() {
+    howToModal.style.display = 'flex';
+};
+closeHowTo.onclick = function() {
+    howToModal.style.display = 'none';
+};
+
 function startGame() {
     liters = 0;
     linesCleared = 0;
@@ -372,8 +417,11 @@ function startGame() {
     drawNext();
     deliveredDisplay.textContent = `Liters Delivered: 0`;
     updateLevelDisplay();
+    updateLinesToNext();
     dropStart = Date.now();
     hideGameOverOverlay();
+    paused = false;
+    pauseBtn.textContent = 'Pause';
     drop();
 }
 document.getElementById('restart').onclick = startGame;
@@ -391,6 +439,12 @@ overlayRestart.addEventListener('keydown', function(e) {
         startGame();
     }
 });
+
+// Charity: water Fact Rotator
+const factRotator = document.getElementById('fact-rotator');
+let factIndex = 0;
+setInterval(showRotatingFact, 8000);
+showRotatingFact();
 
 // Initial start
 startGame();

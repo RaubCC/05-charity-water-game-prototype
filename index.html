@@ -122,8 +122,12 @@
         <div id="game-container">
             <canvas id="tetris" width="300" height="600" aria-label="Tetris game board" tabindex="0"></canvas>
             <div id="sidebar">
+                <button id="sidebar-toggle" aria-label="Toggle sidebar">☰</button>
+                <div id="score-label">Your Score</div>
                 <h2 id="water-delivered">Liters Delivered: 0</h2>
+                <div id="lines-to-next">Next Level in 8 lines</div>
                 <div id="level-display" style="background:#fff;border:2px solid #FFC907;border-radius:8px;padding:0.5rem 1.2rem;font-size:1.1rem;text-align:center;margin-bottom:1rem;">Level: 1</div>
+                <button id="pause-btn" aria-label="Pause game">Pause</button>
                 <button id="restart" aria-label="Restart game" tabindex="0">Restart</button>
                 <div id="next-piece">
                     <h3>Next Piece</h3>
@@ -142,6 +146,13 @@
         <div id="game-over-overlay">
             <div>Game Over!<br><span id="final-liters"></span></div>
             <button id="overlay-restart" tabindex="0">Restart</button>
+        </div>
+        <div id="how-to-modal" style="display:none;position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,0.5);z-index:1000;align-items:center;justify-content:center;">
+            <div style="background:#fff;padding:2rem 2.5rem;border-radius:16px;max-width:340px;text-align:center;box-shadow:0 4px 24px #2E9DF733;">
+                <h2>How to Play</h2>
+                <p>Use <b>Arrow keys</b> to move and rotate pieces.<br> <b>Space</b> to drop, <b>Enter</b> to restart after game over.<br>Clear lines to deliver clean water and unlock fun facts!<br><br>Watch out for mud blocks and level up for more challenge!</p>
+                <button id="close-how-to" style="margin-top:1rem;background:#2E9DF7;color:#fff;border:none;border-radius:8px;padding:0.6rem 1.8rem;font-size:1rem;cursor:pointer;font-weight:bold;">OK</button>
+            </div>
         </div>
         <div id="splash-effect" aria-hidden="true"></div>
     </main>
