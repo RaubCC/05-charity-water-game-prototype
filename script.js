@@ -261,7 +261,13 @@ function handleKey(e) {
     }
     drawBoard();
 }
-document.addEventListener('keydown', handleKey);
+document.addEventListener('keydown', function(e) {
+    // Prevent arrow keys and space from scrolling the page
+    if (["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown", " ", "Spacebar"].includes(e.key)) {
+        e.preventDefault();
+    }
+    handleKey(e);
+});
 
 function startGame() {
     liters = 0;
