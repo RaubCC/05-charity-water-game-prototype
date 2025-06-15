@@ -1,28 +1,25 @@
-// Get the canvas elements and their drawing contexts
+// Charity: water Pipe Tetris - Fun Edition
+
 const canvas = document.getElementById('tetris');
 const context = canvas.getContext('2d');
 const nextCanvas = document.getElementById('next');
 const nextContext = nextCanvas.getContext('2d');
 
-// Set up the game board size and block size
-const ROWS = 20;
-const COLS = 10;
-const BLOCK_SIZE = 30;
-
+const ROWS = 20, COLS = 10, BLOCK_SIZE = 30;
 canvas.width = COLS * BLOCK_SIZE;
 canvas.height = ROWS * BLOCK_SIZE;
 
-// Tetromino shapes (pipes style)
+// Tetris shapes (including a rare Jerry Can wildcard)
 const SHAPES = [
-    [[1, 1, 1, 1]], // I (pipe)
-    [[2, 2], [2, 2]], // O
-    [[0, 3, 0], [3, 3, 3]], // T
-    [[0, 4, 4], [4, 4, 0]], // S
-    [[5, 5, 0], [0, 5, 5]], // Z
-    [[6, 0, 0], [6, 6, 6]], // J
-    [[0, 0, 7], [7, 7, 7]], // L
+    [[1, 1, 1, 1]],                // I (pipe)
+    [[2, 2], [2, 2]],              // O
+    [[0, 3, 0], [3, 3, 3]],        // T
+    [[0, 4, 4], [4, 4, 0]],        // S
+    [[5, 5, 0], [0, 5, 5]],        // Z
+    [[6, 0, 0], [6, 6, 6]],        // J
+    [[0, 0, 7], [7, 7, 7]],        // L
+    [[8]],                         // Jerry Can (wildcard)
 ];
-// Pipe colors
 const COLORS = [
     null,
     '#FFC907', // I (yellow pipe)
@@ -32,30 +29,65 @@ const COLORS = [
     '#F5402C', // Z (red pipe)
     '#FF902A', // J (orange pipe)
     '#F16061', // L (pink pipe)
+    '#FFD700'  // Jerry Can (gold)
+];
+const PIECE_NAMES = [
+    "", "I-pipe", "O-pipe", "T-pipe", "S-pipe", "Z-pipe", "J-pipe", "L-pipe", "Jerry Can"
 ];
 
-// Create the game board (2D array)
-let board = Array.from({length: ROWS}, () => Array(COLS).fill(0));
-let current, next, pos, liters = 0, dropStart = Date.now(), gameOver = false;
+const WATER_FACTS = [
+    "Every $1 invested in clean water yields $4–$12 in economic returns.",
+    "Women and girls spend 200 million hours every day collecting water.",
+    "1 in 10 people on Earth don’t have access to clean water.",
+    "Access to clean water reduces global disease and increases education.",
+    "Over 2 billion people use a drinking water source contaminated with feces.",
+    "Clean water saves lives. You’re helping, line by line.",
+    "Diarrhea from unsafe water kills more children than malaria, measles, and HIV/AIDS combined.",
+    "Clean water = more time for school, work, and dreams.",
+    "You’re not just clearing lines. You’re delivering hope."
+];
 
-// Utility function to get a random tetromino
+let board, current, next, pos, liters, dropStart, gameOver, wildReady;
+let deliveredDisplay = document.getElementById('water-delivered');
+let factPopup = document.getElementById('fact-popup');
+let factText = document.getElementById('fact-text');
+let closeFact = document.getElementById('close-fact');
+let linesCleared = 0;
+
+// Utility
 function randomTetromino() {
-    const index = Math.floor(Math.random() * SHAPES.length);
+    // 3% chance of wild Jerry Can
+    let index = Math.random() < 0.03 ? 7 : Math.floor(Math.random() * 7);
     return {
         shape: SHAPES[index],
         color: COLORS[index + 1],
         index: index + 1,
+        name: PIECE_NAMES[index + 1]
     };
 }
-// Draw a single block at (x, y)
 function drawBlock(x, y, color, ctx = context) {
     ctx.fillStyle = color;
     ctx.fillRect(x * BLOCK_SIZE, y * BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE);
     ctx.strokeStyle = "#222";
     ctx.lineWidth = 2;
     ctx.strokeRect(x * BLOCK_SIZE, y * BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE);
+    // Draw can icon if Jerry Can
+    if (color === COLORS[8]) {
+        ctx.fillStyle = "#FFC907";
+        ctx.fillRect(
+            x * BLOCK_SIZE + BLOCK_SIZE * 0.2,
+            y * BLOCK_SIZE + BLOCK_SIZE * 0.4,
+            BLOCK_SIZE * 0.6,
+            BLOCK_SIZE * 0.4
+        );
+        ctx.fillRect(
+            x * BLOCK_SIZE + BLOCK_SIZE * 0.35,
+            y * BLOCK_SIZE + BLOCK_SIZE * 0.2,
+            BLOCK_SIZE * 0.3,
+            BLOCK_SIZE * 0.25
+        );
+    }
 }
-// Draw the game board and the current tetromino
 function drawBoard() {
     context.clearRect(0, 0, canvas.width, canvas.height);
     for (let y = 0; y < ROWS; ++y)
@@ -64,7 +96,6 @@ function drawBoard() {
                 drawBlock(x, y, COLORS[board[y][x]]);
     drawTetromino();
 }
-// Draw the current tetromino
 function drawTetromino() {
     current.shape.forEach((row, y) => {
         row.forEach((value, x) => {
@@ -72,7 +103,6 @@ function drawTetromino() {
         });
     });
 }
-// Draw the next tetromino in the preview box
 function drawNext() {
     nextContext.clearRect(0, 0, nextCanvas.width, nextCanvas.height);
     next.shape.forEach((row, y) => {
@@ -81,7 +111,6 @@ function drawNext() {
         });
     });
 }
-// Check if a move is valid
 function validMove(offsetX = 0, offsetY = 0, tetromino = current.shape) {
     for (let y = 0; y < tetromino.length; ++y) {
         for (let x = 0; x < tetromino[y].length; ++x) {
@@ -95,19 +124,27 @@ function validMove(offsetX = 0, offsetY = 0, tetromino = current.shape) {
     }
     return true;
 }
-// Merge the current tetromino into the board
 function mergeTetromino() {
-    current.shape.forEach((row, y) => {
-        row.forEach((value, x) => {
-            if (value) board[pos.y + y][pos.x + x] = current.index;
+    if (current.index === 8) {
+        // Jerry Can: clear this row instantly and double liters
+        let clearRow = pos.y;
+        let toClear = [];
+        for (let x = 0; x < COLS; x++) {
+            board[clearRow][x] = 0;
+        }
+        liters += 400;
+        showFact("JERRY CAN POWER! Doubled liters for this row!");
+    } else {
+        current.shape.forEach((row, y) => {
+            row.forEach((value, x) => {
+                if (value) board[pos.y + y][pos.x + x] = current.index;
+            });
         });
-    });
+    }
 }
-// Rotate a matrix (tetromino)
 function rotate(matrix) {
     return matrix[0].map((_, i) => matrix.map(row => row[i])).reverse();
 }
-// Clear completed lines and return the number of lines cleared
 function clearLines() {
     let lines = 0;
     board = board.filter(row => {
@@ -120,14 +157,37 @@ function clearLines() {
     while (board.length < ROWS) board.unshift(Array(COLS).fill(0));
     return lines;
 }
-// Update the liters delivered
+function animateLiters(oldVal, newVal) {
+    let step = Math.max(1, Math.floor((newVal - oldVal) / 16));
+    let val = oldVal;
+    function tick() {
+        if (val < newVal) {
+            val += step;
+            if (val > newVal) val = newVal;
+            deliveredDisplay.textContent = `Liters Delivered: ${val}`;
+            requestAnimationFrame(tick);
+        } else {
+            deliveredDisplay.textContent = `Liters Delivered: ${newVal}`;
+        }
+    }
+    tick();
+}
 function updateLiters(lines) {
     if (lines) {
-        liters += lines * 200; // Example: 200 liters per line
-        document.getElementById('water-delivered').textContent = `Liters Delivered: ${liters}`;
+        let litersOld = liters;
+        liters += lines * 200;
+        linesCleared += lines;
+        animateLiters(litersOld, liters);
+        // Show fact every 4 lines
+        if (linesCleared % 4 === 0) showFact();
     }
 }
-// Drop the tetromino down by one row or merge if it can't move
+function showFact(text) {
+    factPopup.style.display = 'block';
+    factText.textContent = text || WATER_FACTS[Math.floor(Math.random() * WATER_FACTS.length)];
+}
+closeFact.onclick = () => { factPopup.style.display = 'none'; };
+
 function drop() {
     if (gameOver) return;
     let now = Date.now(), delta = now - dropStart;
@@ -140,7 +200,7 @@ function drop() {
             updateLiters(lines);
             resetTetromino();
             if (!validMove()) {
-                alert('Game Over! You delivered ' + liters + ' liters of clean water!');
+                showFact(`Game Over! You delivered ${liters} liters of clean water!`);
                 gameOver = true;
             }
         }
@@ -149,16 +209,14 @@ function drop() {
     drawBoard();
     if (!gameOver) requestAnimationFrame(drop);
 }
-// Reset the current tetromino to the next one
 function resetTetromino() {
     current = next;
     next = randomTetromino();
     pos = {x: 3, y: 0};
     drawNext();
 }
-// Handle keyboard input for moving and rotating
 function handleKey(e) {
-    if (gameOver) return;
+    if (gameOver && e.key !== "Enter") return;
     if (e.key === "ArrowLeft" && validMove(-1, 0)) pos.x--;
     if (e.key === "ArrowRight" && validMove(1, 0)) pos.x++;
     if (e.key === "ArrowDown" && validMove(0, 1)) pos.y++;
@@ -169,22 +227,28 @@ function handleKey(e) {
     if (e.key === " ") {
         while (validMove(0, 1)) pos.y++;
     }
+    if (e.key === "Enter" && gameOver) {
+        startGame();
+        factPopup.style.display = 'none';
+    }
     drawBoard();
 }
-
 document.addEventListener('keydown', handleKey);
 
-// Start or restart the game
 function startGame() {
     liters = 0;
+    linesCleared = 0;
     board = Array.from({length: ROWS}, () => Array(COLS).fill(0));
     current = randomTetromino();
     next = randomTetromino();
     pos = {x: 3, y: 0};
     gameOver = false;
     drawNext();
-    document.getElementById('water-delivered').textContent = `Liters Delivered: 0`;
+    deliveredDisplay.textContent = `Liters Delivered: 0`;
     dropStart = Date.now();
     drop();
 }
+document.getElementById('restart').onclick = startGame;
+
+// Initial start
 startGame();
