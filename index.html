@@ -1,13 +1,22 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Charity Water Game</title>
-    <link rel="stylesheet" href="styles.css">
-</head>
+<!-- Replace your <body> in index.html with: -->
 <body>
-    <h1>Welcome to the Charity Water Game Prototype</h1>
+    <header>
+        <h1>Charity: water Pipe Tetris</h1>
+    </header>
+    <main>
+        <div id="game-container">
+            <canvas id="tetris" width="300" height="600"></canvas>
+            <div id="sidebar">
+                <h2 id="water-delivered">Liters Delivered: 0</h2>
+                <div id="next-piece">
+                    <h3>Next Piece</h3>
+                    <canvas id="next" width="100" height="100"></canvas>
+                </div>
+            </div>
+        </div>
+    </main>
+    <footer>
+        <p>Every line cleared delivers clean water.<br>charity: water</p>
+    </footer>
     <script src="script.js"></script>
 </body>
-</html>
