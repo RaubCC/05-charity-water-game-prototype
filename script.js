@@ -431,27 +431,10 @@ let factIndex = 0;
 setInterval(showRotatingFact, 8000);
 showRotatingFact();
 
-// --- Ensure the PLAY button starts the game reliably ---
-// We set up the event after all functions are defined, so it always works.
-const startOverlay = document.getElementById('start-overlay');
-const playBtn = document.getElementById('play-btn');
-if (playBtn) {
-    playBtn.onclick = function() {
-        // Hide the overlay and start the game
-        startOverlay.style.display = 'none';
-        startGame();
-    };
-}
-
+// --- Automatically start the game when the page loads ---
 window.addEventListener('DOMContentLoaded', function() {
     document.getElementById('loading-message').style.display = 'none';
-    // Show start overlay, wait for user to click PLAY
-    const startOverlay = document.getElementById('start-overlay');
-    const playBtn = document.getElementById('play-btn');
-    playBtn.onclick = function() {
-        startOverlay.style.display = 'none';
-        startGame();
-    };
+    startGame();
 });
 
 // --- Mobile Controls for Touch Devices ---
