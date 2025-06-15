@@ -414,14 +414,15 @@ function startGame() {
     next = randomTetromino();
     pos = {x: 3, y: 0};
     gameOver = false;
+    paused = false;
+    pauseBtn.textContent = 'Pause';
+    sidebar.classList.remove('collapsed');
     drawNext();
     deliveredDisplay.textContent = `Liters Delivered: 0`;
     updateLevelDisplay();
     updateLinesToNext();
     dropStart = Date.now();
     hideGameOverOverlay();
-    paused = false;
-    pauseBtn.textContent = 'Pause';
     drop();
 }
 document.getElementById('restart').onclick = startGame;
@@ -448,3 +449,8 @@ showRotatingFact();
 
 // Initial start
 startGame();
+
+window.addEventListener('DOMContentLoaded', function() {
+    document.getElementById('loading-message').style.display = 'none';
+    startGame();
+});
