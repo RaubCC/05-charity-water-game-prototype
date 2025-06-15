@@ -223,3 +223,31 @@ footer {
         display: block;
     }
 }
+
+/* Mobile controls: hidden by default, shown on small screens */
+#mobile-controls {
+    display: none;
+}
+#mobile-controls button {
+    background: #2E9DF7;
+    color: #fff;
+    border: none;
+    border-radius: 50%;
+    width: 54px;
+    height: 54px;
+    font-size: 2rem;
+    margin: 0 0.2rem;
+    box-shadow: 0 2px 8px #2E9DF733;
+    cursor: pointer;
+    font-weight: bold;
+    transition: background 0.2s;
+}
+#mobile-controls button:active {
+    background: #FFC907;
+    color: #222;
+}
+@media (max-width: 700px) {
+    #mobile-controls {
+        display: flex;
+    }
+}

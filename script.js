@@ -453,3 +453,48 @@ window.addEventListener('DOMContentLoaded', function() {
         startGame();
     };
 });
+
+// --- Mobile Controls for Touch Devices ---
+// These buttons let users play on phones/tablets without a keyboard.
+const btnLeft = document.getElementById('btn-left');
+const btnRight = document.getElementById('btn-right');
+const btnRotate = document.getElementById('btn-rotate');
+const btnDrop = document.getElementById('btn-drop');
+
+if (btnLeft && btnRight && btnRotate && btnDrop) {
+    // Move left
+    btnLeft.addEventListener('touchstart', function(e) {
+        e.preventDefault();
+        if (!gameOver && validMove(-1, 0)) {
+            pos.x--;
+            drawBoard();
+        }
+    });
+    // Move right
+    btnRight.addEventListener('touchstart', function(e) {
+        e.preventDefault();
+        if (!gameOver && validMove(1, 0)) {
+            pos.x++;
+            drawBoard();
+        }
+    });
+    // Rotate
+    btnRotate.addEventListener('touchstart', function(e) {
+        e.preventDefault();
+        if (!gameOver) {
+            const rotated = rotate(current.shape);
+            if (validMove(0, 0, rotated)) {
+                current.shape = rotated;
+                drawBoard();
+            }
+        }
+    });
+    // Drop
+    btnDrop.addEventListener('touchstart', function(e) {
+        e.preventDefault();
+        if (!gameOver) {
+            while (validMove(0, 1)) pos.y++;
+            drawBoard();
+        }
+    });
+}

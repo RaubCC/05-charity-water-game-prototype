@@ -121,6 +121,13 @@
     <main>
         <div id="game-container">
             <canvas id="tetris" width="300" height="600" aria-label="Tetris game board" tabindex="0"></canvas>
+            <!-- Mobile Controls: Only visible on small screens -->
+            <div id="mobile-controls" style="display:none;flex-direction:row;justify-content:center;gap:1.2rem;margin:1.2rem 0 0 0;">
+                <button id="btn-left" aria-label="Move Left">&#8592;</button>
+                <button id="btn-rotate" aria-label="Rotate">&#8635;</button>
+                <button id="btn-right" aria-label="Move Right">&#8594;</button>
+                <button id="btn-drop" aria-label="Drop">&#8595;</button>
+            </div>
             <div id="sidebar">
                 <button id="sidebar-toggle" aria-label="Toggle sidebar">☰</button>
                 <div id="score-label">Your Score</div>
