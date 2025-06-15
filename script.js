@@ -433,5 +433,11 @@ showRotatingFact();
 
 window.addEventListener('DOMContentLoaded', function() {
     document.getElementById('loading-message').style.display = 'none';
-    startGame();
+    // Show start overlay, wait for user to click PLAY
+    const startOverlay = document.getElementById('start-overlay');
+    const playBtn = document.getElementById('play-btn');
+    playBtn.onclick = function() {
+        startOverlay.style.display = 'none';
+        startGame();
+    };
 });
