@@ -177,8 +177,21 @@ function animateLiters(oldVal, newVal) {
     }
     tick();
 }
+const splashEffect = document.getElementById('splash-effect');
+function showSplash() {
+    const splash = document.createElement('div');
+    splash.className = 'splash';
+    // Randomize a little for fun
+    const offsetX = (Math.random() - 0.5) * 120;
+    const offsetY = (Math.random() - 0.5) * 60;
+    splash.style.left = `calc(50% + ${offsetX}px)`;
+    splash.style.top = `calc(40% + ${offsetY}px)`;
+    splashEffect.appendChild(splash);
+    setTimeout(() => splash.remove(), 700);
+}
 function updateLiters(lines) {
     if (lines) {
+        showSplash(); // Show water splash when a line is cleared
         let litersOld = liters;
         liters += lines * 200;
         linesCleared += lines;
