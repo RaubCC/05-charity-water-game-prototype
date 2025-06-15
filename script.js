@@ -431,9 +431,6 @@ let factIndex = 0;
 setInterval(showRotatingFact, 8000);
 showRotatingFact();
 
-// Initial start
-startGame();
-
 window.addEventListener('DOMContentLoaded', function() {
     document.getElementById('loading-message').style.display = 'none';
     startGame();
