@@ -477,6 +477,9 @@ window.addEventListener('DOMContentLoaded', function() {
         btnDrop.addEventListener('click', dropPiece);
     }
 
+    // Get the game over overlay element
+    const gameOverOverlay = document.getElementById('game-over-overlay'); // Use correct id from HTML
+
     // Add this function so the game does not crash
     function hideGameOverOverlay() {
         if (gameOverOverlay) {
