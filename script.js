@@ -59,10 +59,24 @@ const gameOverOverlay = document.getElementById('game-over-overlay');
 const finalLiters = document.getElementById('final-liters');
 const overlayRestart = document.getElementById('overlay-restart');
 
+// Add a mud block (obstacle) to SHAPES and COLORS
+const MUD_INDEX = 9;
+SHAPES.push([[MUD_INDEX]]); // Single block
+COLORS.push('#8B5C2A'); // Brown color for mud
+PIECE_NAMES.push('Mud Block');
+
 // Utility
 function randomTetromino() {
-    // 3% chance of wild Jerry Can
-    let index = Math.random() < 0.03 ? 7 : Math.floor(Math.random() * 7);
+    // 3% Jerry Can, 7% Mud Block, rest normal
+    const rand = Math.random();
+    let index;
+    if (rand < 0.03) {
+        index = 7; // Jerry Can
+    } else if (rand < 0.10) {
+        index = 8; // Mud Block (new index)
+    } else {
+        index = Math.floor(Math.random() * 7);
+    }
     return {
         shape: SHAPES[index],
         color: COLORS[index + 1],
@@ -91,6 +105,13 @@ function drawBlock(x, y, color, ctx = context) {
             BLOCK_SIZE * 0.3,
             BLOCK_SIZE * 0.25
         );
+    }
+    // Draw mud icon if mud block
+    if (color === COLORS[9]) {
+        ctx.fillStyle = '#6B3E14';
+        ctx.beginPath();
+        ctx.arc(x * BLOCK_SIZE + BLOCK_SIZE/2, y * BLOCK_SIZE + BLOCK_SIZE/2, BLOCK_SIZE/4, 0, 2 * Math.PI);
+        ctx.fill();
     }
 }
 function drawBoard() {
@@ -133,12 +154,17 @@ function mergeTetromino() {
     if (current.index === 8) {
         // Jerry Can: clear this row instantly and double liters
         let clearRow = pos.y;
-        let toClear = [];
         for (let x = 0; x < COLS; x++) {
             board[clearRow][x] = 0;
         }
         liters += 400;
         showFact("JERRY CAN POWER! Doubled liters for this row!");
+    } else if (current.index === 9) {
+        // Mud block: place on board, reduce liters
+        board[pos.y][pos.x] = 9;
+        liters = Math.max(0, liters - 100);
+        deliveredDisplay.textContent = `Liters Delivered: ${liters}`;
+        showFact("Oh no! Mud block! -100 liters delivered.");
     } else {
         current.shape.forEach((row, y) => {
             row.forEach((value, x) => {
