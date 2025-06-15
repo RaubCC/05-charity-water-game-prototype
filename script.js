@@ -196,8 +196,8 @@ function updateLiters(lines) {
         liters += lines * 200;
         linesCleared += lines;
         animateLiters(litersOld, liters);
-        // Show fact every 4 lines
-        if (linesCleared % 4 === 0) showFact();
+        // Show a water fact every time a line is cleared
+        showFact();
     }
 }
 function showFact(text) {
