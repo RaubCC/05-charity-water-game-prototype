@@ -72,6 +72,54 @@ header {
     box-shadow: 0 2px 8px rgba(46,157,247,0.10);
 }
 
+#restart {
+    background: #2E9DF7;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 0.75rem 2rem;
+    margin: 1rem 0;
+    font-size: 1.2rem;
+    cursor: pointer;
+    font-weight: bold;
+    transition: background 0.2s;
+}
+#restart:hover {
+    background: #159A48;
+}
+
+#fact-popup {
+    position: fixed;
+    top: 30vh;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #fff;
+    color: #222;
+    border: 4px solid #FFC907;
+    border-radius: 20px;
+    box-shadow: 0 8px 36px rgba(46,157,247,0.18);
+    z-index: 100;
+    padding: 2rem 3rem;
+    text-align: center;
+    max-width: 400px;
+    animation: popIn 0.4s;
+}
+#close-fact {
+    margin-top: 1rem;
+    background: #FFC907;
+    color: #222;
+    border: none;
+    border-radius: 8px;
+    padding: 0.6rem 1.8rem;
+    font-size: 1rem;
+    cursor: pointer;
+    font-weight: bold;
+}
+@keyframes popIn {
+    from { transform: scale(0.6) translateX(-50%); opacity: 0;}
+    to { transform: scale(1) translateX(-50%); opacity: 1;}
+}
+
 footer {
     margin-top: 2rem;
     font-size: 1rem;
