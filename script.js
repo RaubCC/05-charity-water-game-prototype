@@ -157,6 +157,8 @@ window.addEventListener('DOMContentLoaded', function() {
         if (fact) {
             factText.textContent = fact;
             factPopup.style.display = 'block';
+            paused = true; // Pause the game while popup is visible
+            pauseBtn.textContent = 'Resume';
         } else {
             // Show a random rotating fact in the sidebar
             factRotator.textContent = WATER_FACTS[factIndex];
@@ -385,6 +387,9 @@ window.addEventListener('DOMContentLoaded', function() {
     // Allow user to close the fact popup and return to the game
     closeFact.addEventListener('click', function() {
         factPopup.style.display = 'none';
+        paused = false; // Resume the game
+        pauseBtn.textContent = 'Pause';
+        drop(); // Resume the drop loop if needed
     });
 
     function startGame() {
