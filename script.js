@@ -463,23 +463,29 @@ const btnDrop = document.getElementById('btn-drop');
 
 if (btnLeft && btnRight && btnRotate && btnDrop) {
     // Move left
-    btnLeft.addEventListener('touchstart', function(e) {
+    function moveLeft(e) {
         e.preventDefault();
         if (!gameOver && validMove(-1, 0)) {
             pos.x--;
             drawBoard();
         }
-    });
+    }
+    btnLeft.addEventListener('touchstart', moveLeft);
+    btnLeft.addEventListener('click', moveLeft);
+
     // Move right
-    btnRight.addEventListener('touchstart', function(e) {
+    function moveRight(e) {
         e.preventDefault();
         if (!gameOver && validMove(1, 0)) {
             pos.x++;
             drawBoard();
         }
-    });
+    }
+    btnRight.addEventListener('touchstart', moveRight);
+    btnRight.addEventListener('click', moveRight);
+
     // Rotate
-    btnRotate.addEventListener('touchstart', function(e) {
+    function rotatePiece(e) {
         e.preventDefault();
         if (!gameOver) {
             const rotated = rotate(current.shape);
@@ -488,13 +494,18 @@ if (btnLeft && btnRight && btnRotate && btnDrop) {
                 drawBoard();
             }
         }
-    });
+    }
+    btnRotate.addEventListener('touchstart', rotatePiece);
+    btnRotate.addEventListener('click', rotatePiece);
+
     // Drop
-    btnDrop.addEventListener('touchstart', function(e) {
+    function dropPiece(e) {
         e.preventDefault();
         if (!gameOver) {
             while (validMove(0, 1)) pos.y++;
             drawBoard();
         }
-    });
+    }
+    btnDrop.addEventListener('touchstart', dropPiece);
+    btnDrop.addEventListener('click', dropPiece);
 }
