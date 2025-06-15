@@ -462,12 +462,31 @@ const btnRotate = document.getElementById('btn-rotate');
 const btnDrop = document.getElementById('btn-drop');
 
 if (btnLeft && btnRight && btnRotate && btnDrop) {
+    // Helper to ensure the game loop is running
+    function ensureGameLoop() {
+        if (!gameOver && !paused) {
+            dropStart = Date.now();
+            // Only start a new loop if not already running
+            if (typeof window._tetrisLoopRunning === 'undefined' || !window._tetrisLoopRunning) {
+                window._tetrisLoopRunning = true;
+                requestAnimationFrame(function loop() {
+                    if (!gameOver && !paused) {
+                        drop();
+                        requestAnimationFrame(loop);
+                    } else {
+                        window._tetrisLoopRunning = false;
+                    }
+                });
+            }
+        }
+    }
     // Move left
     function moveLeft(e) {
         e.preventDefault();
         if (!gameOver && validMove(-1, 0)) {
             pos.x--;
             drawBoard();
+            ensureGameLoop();
         }
     }
     btnLeft.addEventListener('touchstart', moveLeft);
@@ -479,6 +498,7 @@ if (btnLeft && btnRight && btnRotate && btnDrop) {
         if (!gameOver && validMove(1, 0)) {
             pos.x++;
             drawBoard();
+            ensureGameLoop();
         }
     }
     btnRight.addEventListener('touchstart', moveRight);
@@ -492,6 +512,7 @@ if (btnLeft && btnRight && btnRotate && btnDrop) {
             if (validMove(0, 0, rotated)) {
                 current.shape = rotated;
                 drawBoard();
+                ensureGameLoop();
             }
         }
     }
@@ -504,6 +525,7 @@ if (btnLeft && btnRight && btnRotate && btnDrop) {
         if (!gameOver) {
             while (validMove(0, 1)) pos.y++;
             drawBoard();
+            ensureGameLoop();
         }
     }
     btnDrop.addEventListener('touchstart', dropPiece);
