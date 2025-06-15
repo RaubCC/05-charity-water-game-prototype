@@ -477,6 +477,13 @@ window.addEventListener('DOMContentLoaded', function() {
         btnDrop.addEventListener('click', dropPiece);
     }
 
+    // Add this function so the game does not crash
+    function updateLevelDisplay() {
+        if (levelDisplay) {
+            levelDisplay.textContent = `Level: ${level}`;
+        }
+    }
+
     // Start the game
     startGame();
 });
