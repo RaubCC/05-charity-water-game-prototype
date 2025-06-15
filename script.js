@@ -54,6 +54,11 @@ let factText = document.getElementById('fact-text');
 let closeFact = document.getElementById('close-fact');
 let linesCleared = 0;
 
+// Game Over Overlay logic
+const gameOverOverlay = document.getElementById('game-over-overlay');
+const finalLiters = document.getElementById('final-liters');
+const overlayRestart = document.getElementById('overlay-restart');
+
 // Utility
 function randomTetromino() {
     // 3% chance of wild Jerry Can
@@ -188,6 +193,15 @@ function showFact(text) {
 }
 closeFact.onclick = () => { factPopup.style.display = 'none'; };
 
+function showGameOverOverlay() {
+    finalLiters.textContent = `You delivered ${liters} liters of clean water!`;
+    gameOverOverlay.classList.add('active');
+    overlayRestart.focus();
+}
+function hideGameOverOverlay() {
+    gameOverOverlay.classList.remove('active');
+}
+
 function drop() {
     if (gameOver) return;
     let now = Date.now(), delta = now - dropStart;
@@ -200,8 +214,9 @@ function drop() {
             updateLiters(lines);
             resetTetromino();
             if (!validMove()) {
-                showFact(`Game Over! You delivered ${liters} liters of clean water!`);
+                showGameOverOverlay();
                 gameOver = true;
+                return;
             }
         }
         dropStart = Date.now();
@@ -246,9 +261,24 @@ function startGame() {
     drawNext();
     deliveredDisplay.textContent = `Liters Delivered: 0`;
     dropStart = Date.now();
+    hideGameOverOverlay();
     drop();
 }
 document.getElementById('restart').onclick = startGame;
+
+// Overlay restart button
+overlayRestart.onclick = () => {
+    hideGameOverOverlay();
+    startGame();
+};
+
+// Also allow Enter key to restart from overlay
+overlayRestart.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter' || e.key === ' ') {
+        hideGameOverOverlay();
+        startGame();
+    }
+});
 
 // Initial start
 startGame();
