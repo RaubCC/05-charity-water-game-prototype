@@ -451,7 +451,7 @@ window.addEventListener('DOMContentLoaded', function() {
             if (!gameOver && validMove(1, 0)) {
                 pos.x++;
                 drawBoard();
-                dropStart = Date.now(); // Reset drop timer
+                dropStart = Date.now();
             }
         }
         btnRight.addEventListener('touchstart', moveRight);
@@ -465,7 +465,7 @@ window.addEventListener('DOMContentLoaded', function() {
                 if (validMove(0, 0, rotated)) {
                     current.shape = rotated;
                     drawBoard();
-                    dropStart = Date.now(); // Reset drop timer
+                    dropStart = Date.now();
                 }
             }
         }
@@ -478,7 +478,7 @@ window.addEventListener('DOMContentLoaded', function() {
             if (!gameOver) {
                 while (validMove(0, 1)) pos.y++;
                 drawBoard();
-                dropStart = Date.now(); // Reset drop timer
+                dropStart = Date.now();
             }
         }
         btnDrop.addEventListener('touchstart', dropPiece);
