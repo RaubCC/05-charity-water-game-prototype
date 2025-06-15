@@ -220,6 +220,34 @@ function showSplash() {
     splashEffect.appendChild(splash);
     setTimeout(() => splash.remove(), 700);
 }
+
+// Confetti effect for level up
+function showConfetti() {
+    const confettiColors = ['#FFC907', '#2E9DF7', '#8BD1CB', '#4FCB53', '#F5402C', '#FF902A', '#F16061'];
+    const splashEffect = document.getElementById('splash-effect');
+    for (let i = 0; i < 32; i++) {
+        const conf = document.createElement('div');
+        conf.style.position = 'absolute';
+        conf.style.left = `${50 + (Math.random() - 0.5) * 40}%`;
+        conf.style.top = '40%';
+        conf.style.width = '12px';
+        conf.style.height = '12px';
+        conf.style.background = confettiColors[Math.floor(Math.random() * confettiColors.length)];
+        conf.style.borderRadius = '3px';
+        conf.style.opacity = '0.85';
+        conf.style.transform = `rotate(${Math.random() * 360}deg)`;
+        conf.style.zIndex = 301;
+        conf.style.transition = 'all 1.1s cubic-bezier(.4,1.4,.6,1)';
+        setTimeout(() => {
+            conf.style.top = `${60 + Math.random() * 30}%`;
+            conf.style.left = `${50 + (Math.random() - 0.5) * 60}%`;
+            conf.style.opacity = '0';
+        }, 10);
+        setTimeout(() => conf.remove(), 1200);
+        splashEffect.appendChild(conf);
+    }
+}
+
 function updateLiters(lines) {
     if (lines) {
         showSplash();
@@ -237,12 +265,12 @@ function updateLevel() {
             level++;
             linesCleared = 0;
             linesToNextLevel += 8;
-            // Adjust mud block chance and speed for each level
             if (level === 2) { mudChance = 0.18; dropSpeeds[1] = 450; }
             if (level === 3) { mudChance = 0.28; dropSpeeds[2] = 350; }
             if (level === 4) { mudChance = 0.40; dropSpeeds[3] = 250; }
             if (level === 5) { mudChance = 0.55; dropSpeeds[4] = 150; }
             showFact(`Level Up! Welcome to Level ${level}.`);
+            showConfetti();
             updateLevelDisplay();
         }
     }
@@ -250,11 +278,20 @@ function updateLevel() {
 function updateLevelDisplay() {
     levelDisplay.textContent = `Level: ${level}`;
 }
-function showFact(text) {
-    factPopup.style.display = 'block';
-    factText.textContent = text || WATER_FACTS[Math.floor(Math.random() * WATER_FACTS.length)];
+
+// Charity: water Fact Rotator
+const factRotator = document.getElementById('fact-rotator');
+let factIndex = 0;
+function showRotatingFact() {
+    factRotator.textContent = WATER_FACTS[factIndex];
+    factIndex = (factIndex + 1) % WATER_FACTS.length;
 }
-closeFact.onclick = () => { factPopup.style.display = 'none'; };
+setInterval(showRotatingFact, 8000);
+showRotatingFact();
+
+// Remove popup fact logic
+function showFact(text) { /* no-op for now */ }
+closeFact.onclick = () => { /* no-op for now */ }
 
 function showGameOverOverlay() {
     finalLiters.textContent = `You delivered ${liters} liters of clean water!`;
