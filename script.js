@@ -304,21 +304,6 @@ function showRotatingFact() {
     factRotator.textContent = WATER_FACTS[factIndex];
     factIndex = (factIndex + 1) % WATER_FACTS.length;
 }
-function drawSidebar() {
-    const sidebar = document.getElementById('sidebar');
-    const ctx = sidebar.getContext('2d');
-    ctx.clearRect(0, 0, sidebar.width, sidebar.height);
-    ctx.fillStyle = '#fff';
-    ctx.fillRect(0, 0, sidebar.width, sidebar.height);
-    ctx.fillStyle = '#222';
-    ctx.font = 'bold 16px Arial';
-    ctx.fillText('Pipe Tetris', 10, 20);
-    ctx.font = '14px Arial';
-    ctx.fillText('Lines Cleared: ' + linesCleared, 10, 50);
-    ctx.fillText('Liters Delivered: ' + liters, 10, 70);
-    ctx.fillText('Level: ' + level, 10, 90);
-    ctx.fillText('Next Level in: ' + (linesToNextLevel - linesCleared), 10, 110);
-}
 function toggleSidebar() {
     const sidebar = document.getElementById('sidebar');
     sidebar.classList.toggle('collapsed');
@@ -331,7 +316,7 @@ function hideHowToModal() {
     const modal = document.getElementById('how-to-modal');
     modal.style.display = 'none';
 }
-function draw() {
+function drop() {
     if (gameOver || paused) return;
     let now = Date.now(), delta = now - dropStart;
     let speed = dropSpeeds[level - 1] || 200;
@@ -352,8 +337,7 @@ function draw() {
         dropStart = Date.now();
     }
     drawBoard();
-    drawSidebar();
-    if (!gameOver && !paused) requestAnimationFrame(draw);
+    if (!gameOver && !paused) requestAnimationFrame(drop);
 }
 function resetTetromino() {
     current = next;
