@@ -53,11 +53,16 @@ let factPopup = document.getElementById('fact-popup');
 let factText = document.getElementById('fact-text');
 let closeFact = document.getElementById('close-fact');
 let linesCleared = 0;
+let level = 1;
+let linesToNextLevel = 8;
+let mudChance = 0.10; // 10% at level 1
+let dropSpeeds = [600, 500, 400, 300, 200]; // ms per drop for levels 1-5
 
 // Game Over Overlay logic
 const gameOverOverlay = document.getElementById('game-over-overlay');
 const finalLiters = document.getElementById('final-liters');
 const overlayRestart = document.getElementById('overlay-restart');
+let levelDisplay = document.getElementById('level-display');
 
 // Add a mud block (obstacle) to SHAPES and COLORS
 const MUD_INDEX = 9;
@@ -67,13 +72,13 @@ PIECE_NAMES.push('Mud Block');
 
 // Utility
 function randomTetromino() {
-    // 3% Jerry Can, 7% Mud Block, rest normal
+    // 3% Jerry Can, mudChance for Mud Block, rest normal
     const rand = Math.random();
     let index;
     if (rand < 0.03) {
         index = 7; // Jerry Can
-    } else if (rand < 0.10) {
-        index = 8; // Mud Block (new index)
+    } else if (rand < 0.03 + mudChance) {
+        index = 8; // Mud Block
     } else {
         index = Math.floor(Math.random() * 7);
     }
@@ -217,14 +222,33 @@ function showSplash() {
 }
 function updateLiters(lines) {
     if (lines) {
-        showSplash(); // Show water splash when a line is cleared
+        showSplash();
         let litersOld = liters;
         liters += lines * 200;
         linesCleared += lines;
         animateLiters(litersOld, liters);
-        // Show a water fact every time a line is cleared
         showFact();
+        updateLevel();
     }
+}
+function updateLevel() {
+    if (linesCleared >= linesToNextLevel) {
+        if (level < 5) {
+            level++;
+            linesCleared = 0;
+            linesToNextLevel += 8;
+            // Adjust mud block chance and speed for each level
+            if (level === 2) { mudChance = 0.18; dropSpeeds[1] = 450; }
+            if (level === 3) { mudChance = 0.28; dropSpeeds[2] = 350; }
+            if (level === 4) { mudChance = 0.40; dropSpeeds[3] = 250; }
+            if (level === 5) { mudChance = 0.55; dropSpeeds[4] = 150; }
+            showFact(`Level Up! Welcome to Level ${level}.`);
+            updateLevelDisplay();
+        }
+    }
+}
+function updateLevelDisplay() {
+    levelDisplay.textContent = `Level: ${level}`;
 }
 function showFact(text) {
     factPopup.style.display = 'block';
@@ -244,7 +268,8 @@ function hideGameOverOverlay() {
 function drop() {
     if (gameOver) return;
     let now = Date.now(), delta = now - dropStart;
-    if (delta > 600) {
+    let speed = dropSpeeds[level - 1] || 200;
+    if (delta > speed) {
         if (validMove(0, 1)) {
             pos.y++;
         } else {
@@ -298,6 +323,10 @@ document.addEventListener('keydown', function(e) {
 function startGame() {
     liters = 0;
     linesCleared = 0;
+    level = 1;
+    linesToNextLevel = 8;
+    mudChance = 0.10;
+    dropSpeeds = [600, 450, 350, 250, 150];
     board = Array.from({length: ROWS}, () => Array(COLS).fill(0));
     current = randomTetromino();
     next = randomTetromino();
@@ -305,6 +334,7 @@ function startGame() {
     gameOver = false;
     drawNext();
     deliveredDisplay.textContent = `Liters Delivered: 0`;
+    updateLevelDisplay();
     dropStart = Date.now();
     hideGameOverOverlay();
     drop();
