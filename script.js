@@ -434,6 +434,16 @@ showRotatingFact();
 // --- Automatically start the game when the page loads ---
 window.addEventListener('DOMContentLoaded', function() {
     document.getElementById('loading-message').style.display = 'none';
+    // Assign DOM elements now that the DOM is loaded
+    pauseBtn = document.getElementById('pause-btn');
+    sidebar = document.getElementById('sidebar');
+    // Also re-assign any other elements that might be undefined
+    deliveredDisplay = document.getElementById('water-delivered');
+    factPopup = document.getElementById('fact-popup');
+    factText = document.getElementById('fact-text');
+    closeFact = document.getElementById('close-fact');
+    levelDisplay = document.getElementById('level-display');
+    // Start the game
     startGame();
 });
 
