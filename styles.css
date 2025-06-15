@@ -13,3 +13,68 @@ Secondary Colors:
 - Pink:       #F16061
 
 */
+
+body {
+    font-family: 'Segoe UI', Arial, sans-serif;
+    background: #f5f6fa;
+    color: #222;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+header {
+    background: #FFC907;
+    color: #222;
+    width: 100vw;
+    padding: 1.5rem 0;
+    text-align: center;
+    box-shadow: 0 4px 12px rgba(46,157,247,0.08);
+    margin-bottom: 1rem;
+}
+
+#game-container {
+    display: flex;
+    gap: 2rem;
+    align-items: flex-start;
+}
+
+#tetris {
+    background: #2E9DF7;
+    border: 8px solid #FFC907;
+    border-radius: 18px;
+    box-shadow: 0 6px 24px rgba(46,157,247,0.08);
+}
+
+#sidebar {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+#water-delivered {
+    background: #FFC907;
+    color: #222;
+    padding: 1rem 2rem;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(46,157,247,0.12);
+    font-size: 1.3rem;
+    text-align: center;
+}
+
+#next-piece {
+    background: #fff;
+    border: 2px solid #2E9DF7;
+    border-radius: 12px;
+    padding: 1rem;
+    text-align: center;
+    box-shadow: 0 2px 8px rgba(46,157,247,0.10);
+}
+
+footer {
+    margin-top: 2rem;
+    font-size: 1rem;
+    color: #159A48;
+    text-align: center;
+}
