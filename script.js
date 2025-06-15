@@ -61,13 +61,6 @@ window.addEventListener('DOMContentLoaded', function() {
     SHAPES.push([[MUD_INDEX]]);
     COLORS.push('#8B5C2A');
     PIECE_NAMES.push('Mud Block');
-    // Sound effects
-    const sounds = {
-        line: new Audio('https://cdn.jsdelivr.net/gh/terkelg/awesome-creative-coding-assets/audio/pop.ogg'),
-        level: new Audio('https://cdn.jsdelivr.net/gh/terkelg/awesome-creative-coding-assets/audio/coin.ogg'),
-        gameover: new Audio('https://cdn.jsdelivr.net/gh/terkelg/awesome-creative-coding-assets/audio/lose.ogg'),
-        mud: new Audio('https://cdn.jsdelivr.net/gh/terkelg/awesome-creative-coding-assets/audio/hit.ogg')
-    };
 
     // Game state
     let board, current, next, pos, liters, dropStart, gameOver, linesCleared, level, linesToNextLevel, mudChance, dropSpeeds, paused;
@@ -158,6 +151,19 @@ window.addEventListener('DOMContentLoaded', function() {
         }
         return true;
     }
+    // Define the function first
+    function showFact(fact) {
+        // Show a fact in the popup or sidebar
+        if (fact) {
+            factText.textContent = fact;
+            factPopup.style.display = 'block';
+        } else {
+            // Show a random rotating fact in the sidebar
+            factRotator.textContent = WATER_FACTS[factIndex];
+            factIndex = (factIndex + 1) % WATER_FACTS.length;
+        }
+    }
+
     function mergeTetromino() {
         if (current.index === 8) {
             // Jerry Can: clear this row instantly and double liters
@@ -176,7 +182,6 @@ window.addEventListener('DOMContentLoaded', function() {
             deliveredDisplay.classList.remove('score-up', 'score-down');
             deliveredDisplay.classList.add('score-down');
             setTimeout(() => deliveredDisplay.classList.remove('score-down'), 400);
-            sounds.mud.currentTime = 0; sounds.mud.play();
         } else {
             current.shape.forEach((row, y) => {
                 row.forEach((value, x) => {
@@ -269,7 +274,6 @@ window.addEventListener('DOMContentLoaded', function() {
             showFact();
             updateLevel();
             updateLinesToNext();
-            sounds.line.currentTime = 0; sounds.line.play();
         }
     }
     function updateLevel() {
@@ -285,7 +289,6 @@ window.addEventListener('DOMContentLoaded', function() {
                 showFact(`Level Up! Welcome to Level ${level}.`);
                 showConfetti();
                 updateLevelDisplay();
-                sounds.level.currentTime = 0; sounds.level.play();
             }
         }
     }
@@ -378,6 +381,11 @@ window.addEventListener('DOMContentLoaded', function() {
     closeHowTo.onclick = function() {
         howToModal.style.display = 'none';
     };
+
+    // Allow user to close the fact popup and return to the game
+    closeFact.addEventListener('click', function() {
+        factPopup.style.display = 'none';
+    });
 
     function startGame() {
         liters = 0;
